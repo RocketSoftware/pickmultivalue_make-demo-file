@@ -1,0 +1,374 @@
+*
+* Copyright (c) 2020 Zumasys, Inc. All rights reserved.
+*
+* RECORD GENERATION PROGRAM FOR TESTING
+*
+* UNIDATA VERSION
+
+    PROMPT ""
+    SENTENCE.VAR=@COMMAND
+    SENTENCE.VAR=TRIM(SENTENCE.VAR)
+    SYSTEM.1000=SENTENCE.VAR
+    CONVERT ' ' TO @AM IN SYSTEM.1000
+    IF SYSTEM.1000<1> = 'MAKE.DEMO.FILE' THEN
+       SYSTEM.1000=DELETE(SYSTEM.1000,1,0,0)
+     END
+    RECOUNT=SYSTEM.1000<1>
+
+    IF RECOUNT EQ "-?" OR OCONV(RECOUNT,'MCU') EQ "-H" THEN
+        CRT
+        CRT "DESCRIPTION:  RECORD GENERATION PROGRAM"
+        CRT
+        CRT "USAGE:  MAKE.DEMO.FILE {NUMBER OF RECORDS {{FILENAME {FILE TYPE}}}} {(OPTIONS}"
+        CRT "        MAKE.DEMO.FILE {-?|-H}"
+        CRT
+        CRT "        NUMBER OF RECORDS  - THIS IS HOW MANY RECORDS WILL BE WRITTEN TO THE FILE"
+        CRT
+        CRT "        FILENAME           - THE NAME OF THE FILE; IF IT DOES NOT EXIST THEN IT WILL BE CREATED"
+        CRT "                             AT THE APPROPRIATE SIZE BASED ON THE NUMBER OF RECORDS."
+        CRT
+       CRT "        FILE TYPE          - CAN BE HASHED, DIR (DIRECTORY), OR DYNAMIC"
+        CRT "                             (HASHED IS THE DEFAULT)"
+        CRT
+        CRT "OPTIONS:"
+        CRT
+        CRT "        C - CLEARS THE TARGET FILE IF IT EXISTS"
+        CRT
+        CRT "        N - CREATE NUMBERED DICTIONARIES"
+        CRT
+        CRT "EXAMPLES:"
+        CRT
+        CRT "        MAKE.DEMO.FILE"
+        CRT "        [PROMPTS FOR THE NUMBER OF RECORDS, FILENAME AND FILE TYPE]"
+        CRT
+        CRT "        MAKE.DEMO.FILE 1000 JDEMO"
+        CRT "        [CREATES THE FILE JDEMO WITH 1000 RECORDS, PROMPTS FOR THE FILE TYPE]"
+        CRT
+        CRT "        MAKE.DEMO.FILE 99999 TESTFILE HASHED"
+        CRT "        [CREATES THE FILE TESTFILE WITH 99999 RECORDS AS FILE TYPE HASHED]"
+        CRT
+        CRT "        MAKE.DEMO.FILE (C"
+        CRT "        [PROMPTS FOR THE NUMBER OF RECORDS, FILENAME AND FILE TYPE,"
+        CRT "         CLEARS THE FILE IF IT EXISTS AND ENCRYPTS THE DATA]"
+        CRT "        MAKE.DEMO.FILE (C"
+        CRT "        [PROMPTS FOR THE NUMBER OF RECORDS, "
+        CRT "         AND CLEARS THE FILE IF IT EXISTS]"
+        CRT
+        STOP
+    END
+
+    LASTWORD = OCONV(SYSTEM.1000<DCOUNT(SYSTEM.1000, @AM)>,'MCU')
+    ENCRYPTED.TEXT=''
+    CASE.TEXT = ""
+    NUMBERED.DICT = 0
+    IF LASTWORD[1,1] = "(" THEN
+       IF INDEX(LASTWORD,"N",1) THEN
+          NUMBERED.DICT = 1
+        END
+    END
+
+    IF RECOUNT[1,1] EQ "(" OR NOT(NUM(RECOUNT)) OR RECOUNT EQ "" THEN
+        CRT 'ENTER <X> AT ANY PROMPT TO EXIT.'
+        CRT
+        CRT "HOW MANY RECORDS TO CREATE: ":
+        INPUT RECOUNT
+    END
+    IF RECOUNT = '' OR OCONV(RECOUNT, 'MCU') = 'X' THEN STOP
+    IF NOT(NUM(RECOUNT)) THEN CRT 'MUST BE A NUMBER!'; STOP
+    IF RECOUNT <= 0 THEN RECOUNT = 1000
+    IDFMT = LEN(RECOUNT):'\0R'; * IDS WILL ONLY BE AS LONG AS THEY NEED TO BE
+
+    FILENAME=SYSTEM.1000<2>
+    IF FILENAME[1,1] EQ "(" OR FILENAME = "" THEN
+        CRT "FILENAME: ":
+        INPUT FILENAME
+        IF FILENAME = '' OR OCONV(FILENAME,'MCU') = 'X' THEN STOP
+    END
+
+    OPEN FILENAME TO M THEN
+        IF LASTWORD[1,1] = "(" AND INDEX(LASTWORD, "C", 1) THEN
+            CLEARFILE M
+        END ELSE
+            CRT "FILE ALREADY EXISTS, CLEAR IT (Y/N/X=STOP)? ":
+            INPUT REPLY
+            REPLY = OCONV(REPLY, 'MCU')
+            BEGIN CASE
+            CASE REPLY = 'N'
+            CASE REPLY = 'X'; STOP
+            CASE REPLY = 'Y'; CLEARFILE M
+            CASE 1
+                CRT 'INVALID REPLY!'
+                STOP
+            END CASE
+        END
+    END ELSE
+       FILETYPE = SYSTEM.1000<3>
+        IF FILETYPE[1,1] EQ "(" OR FILETYPE EQ "" THEN
+            CRT "FILE TYPE (HASHED=DEFAULT, DIR=DIRECTORY, DYNAMIC, OR X=EXIT): ":
+            INPUT FILETYPE
+        END
+        FILETYPE = OCONV(FILETYPE,'MCU')
+        IF FILETYPE = 'X' THEN STOP
+        IF FILETYPE = '' THEN FILETYPE = 'HASHED'
+
+        BEGIN CASE
+          CASE FILETYPE = 'HASHED'
+            MOD = RECOUNT / 14
+            IF MOD < 11 THEN MOD = 11
+            EXECUTE "CREATE.FILE ":FILENAME:" ":MOD
+          CASE FILETYPE = 'DIR'
+            EXECUTE "CREATE.FILE DIR ":FILENAME
+          CASE FILETYPE = 'DYNAMIC'
+             MOD = RECOUNT / 14
+             IF MOD < 11 THEN MOD = 11
+            EXECUTE 'CREATE.FILE ':FILENAME:' ':MOD:' DYNAMIC'
+          CASE 1
+            CRT 'INVALID FILE TYPE!'
+            STOP
+        END CASE
+        OPEN FILENAME TO M ELSE STOP 'CANNOT OPEN ':FILENAME
+    END
+
+    OPEN "DICT ":FILENAME TO DM ELSE STOP 'CANNOT OPEN DICT ':FILENAME
+
+    FIRSTNAME = "JOHN"
+    FIRSTNAME<-1> = "DANIEL"
+    FIRSTNAME<-1> = "HARRY"
+    FIRSTNAME<-1> = "BILL"
+    FIRSTNAME<-1> = "STEVE"
+    FIRSTNAME<-1> = "ERIC"
+    FIRSTNAME<-1> = "GREG"
+    FIRSTNAME<-1> = "ALAN"
+    FIRSTNAME<-1> = "JASON"
+    FIRSTNAME<-1> = "CLIVE"
+    FIRSTNAME<-1> = "CHRIS"
+    FIRSTNAME<-1> = "MIKE"
+    FIRSTNAME<-1> = "MICK"
+    FIRSTNAME<-1> = "PATE"
+    FIRSTNAME<-1> = "BRUCE"
+    FIRSTNAME<-1> = "DOUG"
+    FIRSTNAME<-1> = "DAVID"
+    FIRSTNAME<-1> = "JAMES"
+    FIRSTNAME<-1> = "AMANDA"
+    FIRSTNAME<-1> = "MARTIN"
+    FIRSTNAME<-1> = "PHILIP"
+    FIRSTNAME<-1> = "TED"
+    FIRSTNAME<-1> = "TERRY"
+    FIRSTNAME<-1> = "RON"
+    FIRSTNAME<-1> = "HERVE"
+    FIRSTNAME<-1> = "RAPH"
+    FIRSTNAME<-1> = "FB"
+    FIRSTNAME<-1> = "DELLA"
+
+    LASTNAME = "ATKINS"
+    LASTNAME<-1> = "KLEIN"
+    LASTNAME<-1> = "GATES"
+    LASTNAME<-1> = "JOHNSON"
+    LASTNAME<-1> = "MCNEALY"
+    LASTNAME<-1> = "COOPER"
+    LASTNAME<-1> = "MURPHY"
+    LASTNAME<-1> = "LAMBERT"
+    LASTNAME<-1> = "MURPHY"
+    LASTNAME<-1> = "AUBERT"
+    LASTNAME<-1> = "HARRIS"
+    LASTNAME<-1> = "WILLIS"
+    LASTNAME<-1> = "SMITH"
+    LASTNAME<-1> = "JONES"
+    LASTNAME<-1> = "FLETCHER"
+    LASTNAME<-1> = "POGSON"
+    LASTNAME<-1> = "WATERS"
+    LASTNAME<-1> = "JACKSON"
+    LASTNAME<-1> = "BLACK"
+    LASTNAME<-1> = "WALKER"
+    LASTNAME<-1> = "BAILEY"
+    LASTNAME<-1> = "GIBSON"
+    LASTNAME<-1> = "DEAN"
+    LASTNAME<-1> = "TRAVERS"
+    LASTNAME<-1> = "CLARKE"
+    LASTNAME<-1> = "GRABBIT"
+    LASTNAME<-1> = "LEGGIT"
+    LASTNAME<-1> = "SMOOCH"
+
+    ADDR1 = "10260 SW GREENBURG RD"
+    ADDR1<-1> = "1 MICROSOFT WAY"
+    ADDR1<-1> = "1 SUN AVENUE"
+    ADDR1<-1> = "999 LETSBE AVENUE"
+    ADDR1<-1> = "42 MILLI WAYS"
+    ADDR1<-1> = "121 ELEVEN SQUARE "
+    ADDR1<-1> = "64 HADDOCKEN PLACE"
+    ADDR1<-1> = "123 MAIN ST"
+
+    ADDR2 = "#1020"
+    ADDR2<-1> = "SUITE 23"
+    ADDR2<-1> = "APT 42"
+    ADDR2<-1> = "LEVEL 42"
+    ADDR2<-1> = ""
+
+    CITY = "LOS ANGLES"
+    CITY<-1> = "PORTLAND"
+    CITY<-1> = "RENO"
+    CITY<-1> = "SEATTLE"
+    CITY<-1> = "SAN JOSE"
+    CITY<-1> = "SYDNEY"
+    CITY<-1> = "NEW YORK"
+    CITY<-1> = "SPRINGFIELD"
+    CITY<-1> = "CLEVELAND"
+
+    STATE = "OR"
+    STATE<-1> = "FL"
+    STATE<-1> = "NSW"
+    STATE<-1> = "CA"
+    STATE<-1> = "MD"
+    STATE<-1> = "NY"
+    STATE<-1> = "MI"
+    STATE<-1> = "WA"
+    STATE<-1> = "IN"
+    STATE<-1> = "IL"
+    STATE<-1> = "MA"
+    STATE<-1> = "OH"
+
+    ZIP = "97223"
+    ZIP<-1> = "12345"
+    ZIP<-1> = "72344"
+    ZIP<-1> = "09324"
+    ZIP<-1> = "24358"
+    ZIP<-1> = "09284"
+    ZIP<-1> = "44223"
+
+    HOMETEL = "(666) 246-0149"
+    HOMETEL<-1> = "(555) 555-1237"
+    HOMETEL<-1> = "(524) 555-2437"
+    HOMETEL<-1> = "(125) 555-1337"
+    HOMETEL<-1> = "(124) 555-1337"
+
+    WORKTEL = "(666) 246-0149"
+    WORKTEL<-1> = "(555) 555-1237"
+    WORKTEL<-1> = "(524) 555-2437"
+    WORKTEL<-1> = "(125) 555-1337"
+    WORKTEL<-1> = "(124) 555-1337"
+
+    EMAIL = "@jbase.com"
+    EMAIL<-1> = "@compa.com"
+    EMAIL<-1> = "@compb.com"
+    EMAIL<-1> = "@compc.com"
+    EMAIL<-1> = "@compd.com"
+    EMAIL<-1> = "@compe.com"
+    EMAIL<-1> = "@spam.com"
+    EMAIL<-1> = "@nospam.com"
+    EMAIL<-1> = "@compz.com"
+    EMAIL<-1> = "@morespam.com"
+    EMAIL<-1> = "@alice.com"
+    EMAIL<-1> = "@mason.com"
+    EMAIL<-1> = "@lint.com"
+    EMAIL<-1> = "@hoho.com"
+    EMAIL<-1> = "@zumasys.com"
+
+    HARDWARE = "HP"
+    HARDWARE<-1> = "ZSERIES"
+    HARDWARE<-1> = "PSERIES"
+    HARDWARE<-1> = "XSERIES"
+    HARDWARE<-1> = "ISERIES"
+    HARDWARE<-1> = "DIGITAL"
+    HARDWARE<-1> = "SOLARIS"
+    HARDWARE<-1> = "COMPAQ"
+    HARDWARE<-1> = "SPARC"
+    HARDWARE<-1> = "ASUS"
+
+    OS = "NT"
+    OS <-1> = "AIX"
+    OS <-1> = "HPUX"
+    OS <-1> = "SOLARIS"
+    OS <-1> = "LINUX RH7"
+    OS <-1> = "LINUX RH8"
+    OS <-1> = "TRU64"
+    OS <-1> = "LINUX RH9"
+
+    SYSTEMTYPE = "JBASE"
+    SYSTEMTYPE<-1> = "ROS"
+    SYSTEMTYPE<-1> = "U2"
+    SYSTEMTYPE<-1> = "D3"
+    SYSTEMTYPE<-1> = "IN2"
+    SYSTEMTYPE<-1> = "QM"
+
+* OK, NOW TO MAKE UP A BILLION RECORDS
+    CFIRSTNAME = DCOUNT(FIRSTNAME, @AM)
+    CLASTNAME = DCOUNT(LASTNAME ,@AM)
+    CADDR1 = DCOUNT(ADDR1 ,@AM)
+    CADDR2 = DCOUNT(ADDR2 ,@AM)
+    CCITY = DCOUNT(CITY ,@AM)
+    CSTATE = DCOUNT(STATE ,@AM)
+    CZIP = DCOUNT(ZIP ,@AM)
+    CHOMETEL = DCOUNT(HOMETEL ,@AM)
+    CWORKTEL = DCOUNT(WORKTEL ,@AM)
+    CEMAIL = DCOUNT(EMAIL ,@AM)
+    CHARDWARE = DCOUNT(HARDWARE ,@AM)
+    COS = DCOUNT(OS ,@AM)
+    CSYSTEMTYPE = DCOUNT(SYSTEMTYPE ,@AM)
+
+* CREATE THE DICTIONARY ENTRIES
+    DICTLIST = ""
+    DICTLIST<-1> = 'FIRSTNAME'  : @VM : 'A' : @VM :  '1' : @VM : 'FIRST NAME'     : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '24'
+    DICTLIST<-1> = 'LASTNAME'   : @VM : 'A' : @VM :  '2' : @VM : 'LAST NAME'      : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '20'
+    DICTLIST<-1> = 'ADDR1'      : @VM : 'A' : @VM :  '3' : @VM : 'ADDRESS LINE 1' : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM :  '6'
+    DICTLIST<-1> = 'ADDR2'      : @VM : 'A' : @VM :  '4' : @VM : 'ADDRESS LINE 2' : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '20'
+    DICTLIST<-1> = 'CITY'       : @VM : 'A' : @VM :  '5' : @VM : 'CITY'           : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '10'
+    DICTLIST<-1> = 'STATE'      : @VM : 'A' : @VM :  '6' : @VM : 'STATE'          : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM :  '3'
+    DICTLIST<-1> = 'ZIP'        : @VM : 'A' : @VM :  '7' : @VM : 'ZIP'            : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '12'
+    DICTLIST<-1> = 'HOMETEL'    : @VM : 'A' : @VM :  '8' : @VM : 'HOME TEL'       : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '16'
+    DICTLIST<-1> = 'WORKTEL'    : @VM : 'A' : @VM :  '9' : @VM : 'WORK TEL'       : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '16'
+    DICTLIST<-1> = 'EMAIL'      : @VM : 'A' : @VM : '10' : @VM : 'EMAIL'          : @VM : ''           : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '22'
+    DICTLIST<-1> = 'HARDWARE'   : @VM : 'A' : @VM : '11' : @VM : 'HARDWARE'       : @VM : 'C;12;13;14' : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '15'
+    DICTLIST<-1> = 'OS'         : @VM : 'A' : @VM : '12' : @VM : 'OS'             : @VM : 'D;11'       : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '15'
+    DICTLIST<-1> = 'NUMUSERS'   : @VM : 'A' : @VM : '14' : @VM : 'NUM USERS'      : @VM : 'D;11'       : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM :  '6'
+    DICTLIST<-1> = 'SYSTEMTYPE' : @VM : 'A' : @VM : '13' : @VM : 'MVDBASE'        : @VM : 'D;11'       : @VM : '' : @VM : '' : @VM : '' : @VM : '' : @VM : 'L' : @VM : '24'
+
+    DEC = 1
+    LOOP
+        DICTENTRY = DICTLIST<DEC>
+        DEC=DEC+1
+    WHILE DICTENTRY # "" DO
+        CONVERT @VM TO @AM IN DICTENTRY
+        ID = DICTENTRY<1>
+        DEL DICTENTRY<1>
+        WRITE DICTENTRY ON DM, ID
+        IF NUMBERED.DICT THEN
+           WRITE DICTENTRY ON DM, DEC-1
+         END
+    REPEAT
+    CLOSE DM
+
+    FOR I = 1 TO RECOUNT
+        ATTR1 = FIRSTNAME<1+RND(CFIRSTNAME)>
+        ATTR2 = LASTNAME<1+RND(CLASTNAME)>
+        REC =   ATTR1 : @AM; * :         \
+REC :=         ATTR2 : @AM; * :         \
+REC :=         ADDR1<1+RND(CADDR1)> : @AM; * :    \
+REC :=         ADDR2<1+RND(CADDR2)> : @AM; * :    \
+REC :=         CITY<1+RND(CCITY)> : @AM; * :     \
+REC :=         STATE<1+RND(CSTATE)> : @AM; * :    \
+REC :=         ZIP<1+RND(CZIP)> : @AM; * :     \
+REC :=         HOMETEL<1+RND(CHOMETEL)> : @AM; * :   \
+REC :=         WORKTEL<1+RND(CWORKTEL)>  : @AM; * :    \
+REC :=         OCONV(ATTR1:ATTR2[1,1],"MCL"):EMAIL<1+RND(CEMAIL)>
+
+        CC = RND(8)
+        ATTR11 = HARDWARE<1+RND(CHARDWARE)>
+        ATTR12 = OS<1+RND(COS)>
+        ATTR13 = SYSTEMTYPE<1+RND(CSYSTEMTYPE)>
+        ATTR14 = 50 + RND(2000)
+        FOR X = 1 TO CC
+            ATTR11 := @VM : HARDWARE<1+RND(CHARDWARE)>
+            ATTR12 := @VM : OS<1+RND(COS)>
+            ATTR13 := @VM : SYSTEMTYPE<1+RND(CSYSTEMTYPE)>
+            ATTR14 := @VM : 50 + RND(2000)
+        NEXT X
+        REC<11> = ATTR11 : @AM : ATTR12 : @AM : ATTR13 : @AM : ATTR14
+
+        ID = FMT(I,IDFMT)
+        WRITE REC ON M, ID
+        IF MOD(I, 5000) ELSE CRT @(0):OCONV(I, 'MD0,'):" PROCESSED":
+    NEXT I
+    CLOSE M
+
+    CRT
+    CRT @(0):OCONV(RECOUNT, 'MD0,'):" RECORDS CREATED."
