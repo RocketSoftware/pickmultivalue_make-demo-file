@@ -6,9 +6,12 @@ This repository contains a simple PICK BASIC program to create a file with some 
 
 1. [D3](https://www.rocketsoftware.com/products/rocket-d3)
 2. [jBASE](https://www.jbase.com/)
-3. [OpenQM](https://www.openqm.com/)
-4. [Unidata](https://www.rocketsoftware.com/products/rocket-unidata-0)
-5. [Universe](https://www.rocketsoftware.com/products/rocket-universe-0)
+3. [Unidata](https://www.rocketsoftware.com/products/rocket-unidata-0)
+4. [Universe](https://www.rocketsoftware.com/products/rocket-universe-0)
+
+## Coming Soon
+
+1. [OpenQM](https://www.openqm.com/) - ETA 2020-08-14
 
 ## Data Schema
 
